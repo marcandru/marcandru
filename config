@@ -1,0 +1,253 @@
+# The files we include below will be created / overwritten by nwg-shell tools
+#
+include variables
+include outputs
+include autostart
+include workspaces
+include keyboard
+include pointer
+include touchpad
+
+# ArchLabs sway config
+# Read `man 5 sway` for reference.
+
+# border & title
+for_window [title="^.*"] border pixel 1, title_format "<b> %class >> %title </b>"
+default_border pixel 1
+
+# gaps
+gaps inner 10
+gaps outer 20
+smart_gaps off
+
+# font
+font pango:monospace 11
+
+# mod key used for most binds
+# Mod1 = Alt
+# Mod4 = Super
+set $Mod Mod4
+
+# direction keys
+set $up k
+set $down j
+set $left h
+set $right l
+
+###############     Autostart      ##################
+
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec hash dbus-update-activation-environment 2>/dev/null && \
+    dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+exec ~/.azotebg
+
+### Turn off screen on lid closed
+#set $laptop eDP-1
+#bindswitch lid:on output $laptop disable
+#bindswitch lid:off output $laptop enable
+
+
+### Idle configuration
+exec swayidle -w\
+    timeout 1070 'gtklock -d -s ~/.config/gtklock/gtklock-style.css' \
+    timeout 770 'swaymsg "output * dpms off"' \
+    resume 'swaymsg "output * dpms on"' \
+    before-sleep 'gtklock -d -s  ~/.config/gtklock/gtklock-style.css'
+# This will lock your screen after 300 seconds of inactivity, then turn off
+# your displays after another 300 seconds, and turn your screens back on when
+# resumed. It will also lock your screen before your computer goes to sleep.
+
+#############         Bindings           ##################
+
+# kill focused window
+bindsym $Mod+q kill
+bindsym Mod1+F4 kill
+
+# core applications
+bindsym $Mod+Return       exec $term
+bindsym $Mod+t            exec $term
+bindsym $Mod+Shift+d      exec $dock
+bindsym Control+space     exec $launcher
+bindsym $Mod+d            exec $launcher
+bindsym $Mod+f            exec $filemanager
+
+# Dont know what this does yet
+bindsym $Mod+c            exec swaync-client -t
+
+# Exit menu
+bindsym $Mod+Shift+e exec $exit
+
+# Exit sway (default way to log you out of your Wayland session)
+bindsym $Mod+x exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+
+# screenshot
+bindsym print exec /usr/share/sway/scripts/grimshot --notify save output
+bindsym Shift+print exec ~/.config/sway/scripts/screenshot.sh
+
+# audio
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86AudioStop exec playerctl stop
+bindsym XF86AudioMute exec pamixer -t
+bindsym XF86AudioRaiseVolume exec pamixer -i 2
+bindsym XF86AudioLowerVolume exec pamixer -d 2
+
+# backlight
+bindsym XF86MonBrightnessUp exec brightnessctl -c backlight set +5%
+bindsym XF86MonBrightnessDown exec brightnessctl -c backlight set 5%-
+
+# Reload the configuration file
+bindsym $Mod+Shift+c reload
+
+###########          Workspace Bindings          ###############
+
+# switch to workspace
+bindsym $Mod+1 workspace number 1
+bindsym $Mod+2 workspace number 2
+bindsym $Mod+3 workspace number 3
+bindsym $Mod+4 workspace number 4
+bindsym $Mod+5 workspace number 5
+bindsym $Mod+6 workspace number 6
+bindsym $Mod+7 workspace number 7
+bindsym $Mod+8 workspace number 8
+
+# switch to workspace - numpad alternatives
+bindsym $Mod+Mod2+KP_1 workspace number 1
+bindsym $Mod+Mod2+KP_2 workspace number 2
+bindsym $Mod+Mod2+KP_3 workspace number 3
+bindsym $Mod+Mod2+KP_4 workspace number 4
+bindsym $Mod+Mod2+KP_5 workspace number 5
+bindsym $Mod+Mod2+KP_6 workspace number 6
+bindsym $Mod+Mod2+KP_7 workspace number 7
+bindsym $Mod+Mod2+KP_8 workspace number 8
+
+# switch to next or previous workspace
+bindsym $Mod+Mod1+Left workspace prev
+bindsym $Mod+Mod1+Right workspace next
+
+# move focused container to workspace
+bindsym $Mod+Shift+1 move container to workspace number 1
+bindsym $Mod+Shift+2 move container to workspace number 2
+bindsym $Mod+Shift+3 move container to workspace number 3
+bindsym $Mod+Shift+4 move container to workspace number 4
+bindsym $Mod+Shift+5 move container to workspace number 5
+bindsym $Mod+Shift+6 move container to workspace number 6
+bindsym $Mod+Shift+7 move container to workspace number 7
+bindsym $Mod+Shift+8 move container to workspace number 8
+
+# move focused container to workspace - numpad alternatives
+bindsym $Mod+Shift+Mod2+KP_End   move container to workspace number 1
+bindsym $Mod+Shift+Mod2+KP_Down  move container to workspace number 2
+bindsym $Mod+Shift+Mod2+KP_Next  move container to workspace number 3
+bindsym $Mod+Shift+Mod2+KP_Left  move container to workspace number 4
+bindsym $Mod+Shift+Mod2+KP_Begin move container to workspace number 5
+bindsym $Mod+Shift+Mod2+KP_Right move container to workspace number 6
+bindsym $Mod+Shift+Mod2+KP_Home  move container to workspace number 7
+bindsym $Mod+Shift+Mod2+KP_Up    move container to workspace number 8
+
+############      Container/Window control  ############
+
+# Scratchpad, Floating
+bindsym $Mod+space floating toggle
+floating_modifier Mod1 normal
+
+# Sway has a "scratchpad", which is a bag of holding for windows.
+# You can send windows there and get them back later.
+
+# Move the currently focused window to the scratchpad
+bindsym $Mod+Shift+z move scratchpad
+
+# Show the next scratchpad window or hide the focused scratchpad window.
+# If there are multiple scratchpad windows, this command cycles through them.
+bindsym $Mod+z scratchpad show
+
+# change focus
+bindsym $Mod+$left  focus left
+bindsym $Mod+$down  focus down
+bindsym $Mod+$up    focus up
+bindsym $Mod+$right focus right
+
+# alternatively, you can use the cursor keys:
+bindsym $Mod+Left   focus left
+bindsym $Mod+Down   focus down
+bindsym $Mod+Up     focus up
+bindsym $Mod+Right  focus right
+
+# move focus to the parent container
+bindsym $Mod+p      focus parent
+
+# move focused window
+bindsym $Mod+Shift+$left  move left
+bindsym $Mod+Shift+$down  move down
+bindsym $Mod+Shift+$up    move up
+bindsym $Mod+Shift+$right move right
+
+# alternatively, you can use the cursor keys:
+bindsym $Mod+Shift+Up    move up
+bindsym $Mod+Shift+Down  move down
+bindsym $Mod+Shift+Left  move left
+bindsym $Mod+Shift+Right move right
+
+# Resizing containers
+mode "resize" {
+    bindsym $left resize shrink width 10px
+    bindsym $down resize grow height 10px
+    bindsym $up resize shrink height 10px
+    bindsym $right resize grow width 10px
+
+    # Ditto, with arrow keys
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+
+    # Return to default mode
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $Mod+r mode "resize"
+
+# layout toggle
+bindsym Mod1+Tab layout toggle tabbed split
+bindsym $Mod+Tab layout toggle splitv splith
+
+# switch to workspace with urgent window
+for_window [urgent="latest"] focus
+focus_on_window_activation   focus
+
+# container layout
+bindsym $Mod+b split h
+bindsym $Mod+v split v
+bindsym $Mod+w layout tabbed
+bindsym $Mod+s layout stacking
+bindsym $Mod+e layout toggle split
+
+default_orientation horizontal
+
+# make the current focus fullscreen
+bindsym $Mod+Shift+f fullscreen
+
+############    application settings   ############
+
+# focus, floating, & sticky
+for_window [app_id="(?i)(?:blueman-manager|azote|gnome-disks)"] floating enable
+for_window [app_id="(?i)(?:pavucontrol|nm-connection-editor|gsimplecal|galculator)"] floating enable
+for_window [app_id="(?i)(?:firefox|chromium)"] border none
+for_window [title="(?i)(?:copying|deleting|moving)"] floating enable
+
+popup_during_fullscreen smart
+
+# Title format for windows
+for_window [shell="xdg_shell"] title_format "%title (%app_id)"
+for_window [shell="x_wayland"] title_format "%class - %title"
+
+# class                 border  bground text    indicator child_border
+client.focused          #6272A4 #6272A4 #F8F8F2 #6272A4   #6272A4
+client.focused_inactive #44475A #44475A #F8F8F2 #44475A   #44475A
+client.unfocused        #282A36 #282A36 #BFBFBF #282A36   #282A36
+client.urgent           #44475A #FF5555 #F8F8F2 #FF5555   #FF5555
+client.placeholder      #282A36 #282A36 #F8F8F2 #282A36   #282A36
+client.background       #F8F8F2
+
